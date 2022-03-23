@@ -28,14 +28,22 @@ export class TrieTree {
           La profundidad devuelta es igual al número de caracteres de prefijo coincidentes.
           La búsqueda se realiza de forma iterativa con un bucle que comienza desde el nodo raíz.
         */
-        let letter, curNode = this.root
-        for (let i = 0; i < str.length; i++) {
-            letter = str[i]
-            if (!curNode.children.hasOwnProperty(letter))
-                return null
-            curNode = curNode.children[letter]
+        if (str.length === 0) {
+            return [this.root, 0];
         }
-        return curNode
+
+        let [node, depth] = [this.root, 0];
+
+        for (let i = 0; i < str.length; i++) {
+            if (node.hasChild(str[i])) {
+                node = node.getChild(str[i]);
+                depth++;
+            } else {
+                return null;
+            }
+        }
+
+        return [node, depth];
     }
 
     traverse(node, prefix, visit) {
@@ -65,17 +73,8 @@ export class TrieTree {
 
     contains(str) {
         // Regresa true si el string se encuentra en el trie tree
-        let node = this.root;
-
-        for (let i = 0; i < str.length; i++) {
-            if (node.children[str[i]]) {
-                node = node.children[str[i]];
-            } else {
-                return false;
-            }
-        }
-
-        return node.terminal;
+        let node = this.findNode(str);
+        return node[0].isTerminal();
     }
 
     insert(str) {
@@ -103,24 +102,28 @@ export class TrieTree {
 
     complete(prefix) {
         // Regresa una lista de strings dado el prefijo
-        let strList = []
-        let node = this.findNode(prefix)
-
-        if (node === null) {
-            return strList
+        if (prefix === "") {
+            return [];
+            //Para evitar que nos aparezcan todas las palabras cuando el termino de busqueda sea ''
         }
 
-        this.traverse(node, prefix, strList.push.bind(strList))
+        let usuariosArr = [];
+        let nodeL = this.findNode(prefix);
 
-        return strList
+        if (!nodeL) {
+            return usuariosArr
+        }
+
+        console.log(nodeL[0]);
+        this.traverse(nodeL[0], prefix, usuariosArr.push.bind(usuariosArr));
+        return usuariosArr;
     }
 
     allTreeStrings() {
         // Crea la lista de strings almacenados en este trie tree
-        let prefix = ''
-        let strList = []
-        this.traverse(this.root, prefix, strList.push.bind(strList))
-
-        return strList
+        let usuariosArr = [];
+        let nodeL = this.root;
+        this.traverse(nodeL, "", usuariosArr.push.bind(usuariosArr));
+        return usuariosArr;
     }
 }
